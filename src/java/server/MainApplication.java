@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import server.config.AppConfiguration;
 import server.healthcheck.AppHealthCheck;
+import server.resources.MovieResource;
+import server.resources.TimeResource;
 
 /**
  * Main application
@@ -52,6 +54,10 @@ public class MainApplication extends Application<AppConfiguration>
 		environment.healthChecks().register("app", new AppHealthCheck());
 
         // register servlet route handlers
-		// environment.jersey().register(new YourServlet());
+		final MovieResource movieResource = new MovieResource();
+		environment.jersey().register(movieResource);
+
+		final TimeResource timeResource = new TimeResource();
+		environment.jersey().register(timeResource);
     }
 }
