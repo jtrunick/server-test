@@ -2,8 +2,8 @@ package server.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Return time
@@ -12,14 +12,15 @@ import java.util.Date;
 @Path("/api")
 public class TimeResource {
 
+    DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss Z");
 
     @GET
     @Path("/timeOfDay")
     public String getTimeOfDay() {
-        // SimpleDateFormat is not thread-safe if used as instance variable, alternatively use joda time.
-        SimpleDateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+        // Java 8 has threadsafe formatter.
+        String text = ZonedDateTime.now().format(FORMATTER);
         // JSON String issue: https://github.com/dropwizard/dropwizard/issues/231
-        return String.format("\"%s\"", format.format(new Date()));
+        return String.format("\"%s\"", text);
     }
 
 }
