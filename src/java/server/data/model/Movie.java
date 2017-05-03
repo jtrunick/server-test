@@ -3,24 +3,38 @@ package server.data.model;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import java.util.UUID;
+import javax.persistence.*;
 
 /**
  * Movie data model
  */
+
+@Entity
+@Table(name = "movie")
+@NamedQueries(
+    {
+        @NamedQuery(
+                name = "Movie.findAll",
+                query = "SELECT p FROM Movie p"
+        )
+    }
+)
 public class Movie {
 
-    private String uuid;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Length(min = 3)
     private String name;
     private String genre;
+
+    // TODO: Max should really be tested dynamically, say < current year + 10;
     @Range(min = 1900, max=2050)
-    private int yearReleased;
+    private Integer yearReleased;
     private Float rating;
 
 
     public Movie() {
-        this.uuid = UUID.randomUUID().toString();
     }
 
     public Movie(String name, String genre, int yearReleased, Float rating) {
@@ -31,15 +45,15 @@ public class Movie {
         setRating(rating);
     }
 
-    public String getUuid() {
-        return this.uuid;
+    public Long getId() {
+        return this.id;
     }
 
     public String getName() {
         return name;
     }
 
-    private void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -47,15 +61,15 @@ public class Movie {
         return genre;
     }
 
-    private void setGenre(String genre) {
+    public void setGenre(String genre) {
         this.genre = genre;
     }
 
-    public int getYearReleased() {
+    public Integer getYearReleased() {
         return yearReleased;
     }
 
-    private void setYearReleased(int yearReleased) {
+    public void setYearReleased(Integer yearReleased) {
         this.yearReleased = yearReleased;
     }
 
@@ -63,7 +77,7 @@ public class Movie {
         return rating;
     }
 
-    private void setRating(Float rating) {
+    public void setRating(Float rating) {
         this.rating = rating;
     }
 

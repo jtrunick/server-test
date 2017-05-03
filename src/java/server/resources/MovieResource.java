@@ -1,19 +1,19 @@
 package server.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import server.data.model.Movie;
+import server.db.MovieDao;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Restful implementation of handling movies.
@@ -31,51 +31,50 @@ import java.util.stream.Collectors;
 public class MovieResource {
 
     final static Logger logger = LoggerFactory.getLogger(MovieResource.class);
-    private Map<String, Movie> moviesByUuid;
+    private MovieDao movieDao;
 
-    public MovieResource() {
-        List<Movie> movies = new ArrayList<>();
-        movies.add(new Movie("The Matrix", "Action,Sci-fi", 1999, 4.3f));
-        movies.add(new Movie("From Russia with Love", "Action", 1963, 4.2f));
-        movies.add(new Movie("Star Wars", "Action,Sci-fi", 2017, null));
-
-        moviesByUuid = movies.stream().collect(Collectors.toMap(x -> x.getUuid(), x -> x));
+    public MovieResource(MovieDao movieDao) {
+        this.movieDao = movieDao;
     }
 
     @GET
     @Timed
+    @UnitOfWork
     @Path("/list")
     public Collection<Movie> getMovies() {
-        logger.info("Returning {} movies", moviesByUuid.size());
-        return moviesByUuid.values();
+        List<Movie> all = movieDao.findAll();
+        logger.info("Returning {} movies", all.size());
+        return all;
     }
 
     @POST
+    @UnitOfWork
     @Path("/create")
     public Movie createMovie(@Valid Movie movie) {
-        if (moviesByUuid.containsKey(movie.getUuid())) {
+        if (movie.getId() != null) {
             throw new WebApplicationException(Response.Status.CONFLICT);
         }
-        moviesByUuid.put(movie.getUuid(), movie);
-        logger.info("Created movie {}", movie.getUuid());
+        movieDao.create(movie);
+        logger.info("Created movie {}", movie.getId());
         return movie;
     }
 
     @PUT
+    @UnitOfWork
     @Path("/update")
     public Movie updateMovie(@Valid Movie movie) {
-        Movie existing = moviesByUuid.get(movie.getUuid());
-        if (existing == null) {
+        Optional<Movie> existing = movieDao.findById(movie.getId());
+        if (!existing.isPresent()) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
-        moviesByUuid.put(movie.getUuid(), movie);
-        return movie;
+        return movieDao.update(existing.get(), movie);
     }
 
     @DELETE
+    @UnitOfWork
     @Path("/delete")
     public void deleteMovie(Movie movie) {
-        moviesByUuid.remove(movie.getUuid());
+        movieDao.delete(movie);
     }
 
 
