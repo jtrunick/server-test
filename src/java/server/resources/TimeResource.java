@@ -2,6 +2,8 @@ package server.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,9 +14,10 @@ import java.time.format.DateTimeFormatter;
 @Path("/api")
 public class TimeResource {
 
-    DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss Z");
+    DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ssa z");
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/timeOfDay")
     public String getTimeOfDay() {
         // Java 8 has threadsafe formatter.
